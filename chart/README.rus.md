@@ -400,8 +400,8 @@ helm unittest chart/
 
 ```bash
 cd exporter
-docker build --platform linux/amd64 --build-arg VERSION=0.1.0 \
-  -t ghcr.io/cicdteam/dell-bios-profile-exporter:0.1.0 .
+docker build --platform linux/amd64 --build-arg VERSION=0.1.1 \
+  -t ghcr.io/cicdteam/dell-bios-profile-exporter:0.1.1 .
 ```
 
 Чарт протестирован против Helm 3.x и Helm 4.x. Под Helm 4 плагин helm-unittest
