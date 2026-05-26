@@ -1,0 +1,15 @@
+# Claude Code - personal/local files
+.claude/CLAUDE.md
+.claude/settings.local.json
+.claude/docs/
+.claude/spec.md
+CLAUDE.local.md
+
+# Go build output
+/exporter/dell-bios-profile-exporter
+/exporter/bin/
+*.out
+
+# Packaged chart + build artifacts
+/dist/
+*.tgz
