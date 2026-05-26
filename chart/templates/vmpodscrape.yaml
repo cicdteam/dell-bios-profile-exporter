@@ -1,0 +1,36 @@
+{{- if and (eq (include "dell-bios.shouldRenderVictoriaMetrics" .) "true") (eq .Values.monitoring.scrapeType "pod") }}
+{{- if .Capabilities.APIVersions.Has "operator.victoriametrics.com/v1beta1" }}
+apiVersion: operator.victoriametrics.com/v1beta1
+kind: VMPodScrape
+metadata:
+  name: {{ include "dell-bios.fullname" . }}
+  labels:
+    {{- include "dell-bios.labels" . | nindent 4 }}
+    {{- with .Values.monitoring.additionalLabels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "dell-bios.selectorLabels" . | nindent 6 }}
+  namespaceSelector:
+    matchNames:
+      - {{ .Release.Namespace }}
+  podMetricsEndpoints:
+    - port: metrics
+      interval: {{ .Values.monitoring.interval }}
+      scrapeTimeout: {{ .Values.monitoring.scrapeTimeout }}
+      relabelConfigs:
+        {{- if .Values.clusterLabel.enabled }}
+        - targetLabel: cluster
+          replacement: {{ .Values.clusterLabel.value | quote }}
+        {{- end }}
+        {{- with .Values.monitoring.relabelings }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      metricRelabelConfigs:
+        {{- with .Values.monitoring.metricRelabelings }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+{{- end }}
+{{- end }}

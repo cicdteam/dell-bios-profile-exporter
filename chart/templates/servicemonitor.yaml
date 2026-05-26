@@ -1,0 +1,36 @@
+{{- if and (eq (include "dell-bios.shouldRenderPrometheus" .) "true") (eq .Values.monitoring.scrapeType "service") }}
+{{- if .Capabilities.APIVersions.Has "monitoring.coreos.com/v1" }}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ include "dell-bios.fullname" . }}
+  labels:
+    {{- include "dell-bios.labels" . | nindent 4 }}
+    {{- with .Values.monitoring.additionalLabels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "dell-bios.selectorLabels" . | nindent 6 }}
+  namespaceSelector:
+    matchNames:
+      - {{ .Release.Namespace }}
+  endpoints:
+    - port: metrics
+      interval: {{ .Values.monitoring.interval }}
+      scrapeTimeout: {{ .Values.monitoring.scrapeTimeout }}
+      relabelings:
+        {{- if .Values.clusterLabel.enabled }}
+        - targetLabel: cluster
+          replacement: {{ .Values.clusterLabel.value | quote }}
+        {{- end }}
+        {{- with .Values.monitoring.relabelings }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      metricRelabelings:
+        {{- with .Values.monitoring.metricRelabelings }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+{{- end }}
+{{- end }}
