@@ -1,0 +1,96 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: {{ include "dell-bios.fullname" . }}
+  labels:
+    {{- include "dell-bios.labels" . | nindent 4 }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "dell-bios.selectorLabels" . | nindent 6 }}
+  updateStrategy:
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        {{- include "dell-bios.selectorLabels" . | nindent 8 }}
+        {{- with .Values.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+        {{- with .Values.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      serviceAccountName: {{ include "dell-bios.serviceAccountName" . }}
+      hostPID: {{ .Values.security.hostPID }}
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.placement.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.placement.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.placement.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.placement.priorityClassName }}
+      priorityClassName: {{ . | quote }}
+      {{- end }}
+      containers:
+        - name: exporter
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          args: []
+          env:
+            - name: NODE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+          envFrom:
+            - configMapRef:
+                name: {{ include "dell-bios.fullname" . }}
+          ports:
+            - name: metrics
+              containerPort: {{ .Values.exporter.port }}
+              protocol: TCP
+          securityContext:
+            {{- if .Values.security.privileged }}
+            privileged: true
+            {{- else }}
+            capabilities:
+              {{- toYaml .Values.security.capabilities | nindent 14 }}
+            {{- end }}
+            runAsUser: {{ .Values.security.runAsUser }}
+            runAsGroup: {{ .Values.security.runAsGroup }}
+            readOnlyRootFilesystem: {{ .Values.security.readOnlyRootFilesystem }}
+            allowPrivilegeEscalation: true
+            seccompProfile:
+              {{- toYaml .Values.security.seccompProfile | nindent 14 }}
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: metrics
+            initialDelaySeconds: 30
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /readyz
+              port: metrics
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: tmp
+          emptyDir: {}

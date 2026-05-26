@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "dell-bios.fullname" . }}
+  labels:
+    {{- include "dell-bios.labels" . | nindent 4 }}
+data:
+  POLL_INTERVAL: {{ .Values.exporter.pollInterval | quote }}
+  SYSINFO_INTERVAL: {{ .Values.exporter.sysinfoInterval | quote }}
+  REQUEST_TIMEOUT: {{ .Values.exporter.requestTimeout | quote }}
+  RACADM_PATH: {{ .Values.exporter.racadmPath | quote }}
+  NSENTER_PATH: {{ .Values.exporter.nsenterPath | quote }}
+  LOG_LEVEL: {{ .Values.exporter.logLevel | quote }}
+  LISTEN_PORT: {{ .Values.exporter.port | quote }}
+  TARGET_PROFILE: {{ .Values.alerts.targetProfile | quote }}
