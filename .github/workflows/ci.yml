@@ -87,17 +87,20 @@ jobs:
     if: ${{ needs.changes.outputs.chart == 'true' }}
     runs-on: ubuntu-latest
     env:
+      HELM4_VERSION: v4.2.0
       HELM3_VERSION: v3.17.3
       KUBECONFORM_VERSION: v0.6.7
     steps:
       - uses: actions/checkout@v4
-      - name: Install Helm 4 (latest) as `helm`
-        run: curl -fsSL https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+      - name: Install Helm 4 as `helm`
+        run: |
+          curl -fsSL "https://get.helm.sh/helm-${HELM4_VERSION}-linux-amd64.tar.gz" | tar -xz -C /tmp
+          sudo mv /tmp/linux-amd64/helm /usr/local/bin/helm
       - name: Install Helm 3 as ~/bin/helm3
         run: |
-          mkdir -p "$HOME/bin"
-          curl -fsSL "https://get.helm.sh/helm-${HELM3_VERSION}-linux-amd64.tar.gz" | tar -xz -C /tmp
-          mv /tmp/linux-amd64/helm "$HOME/bin/helm3"
+          mkdir -p "$HOME/bin" /tmp/h3
+          curl -fsSL "https://get.helm.sh/helm-${HELM3_VERSION}-linux-amd64.tar.gz" | tar -xz -C /tmp/h3
+          mv /tmp/h3/linux-amd64/helm "$HOME/bin/helm3"
       - name: Install kubeconform
         run: |
           curl -fsSL "https://github.com/yannh/kubeconform/releases/download/${KUBECONFORM_VERSION}/kubeconform-linux-amd64.tar.gz" \
