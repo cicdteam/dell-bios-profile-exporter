@@ -1,0 +1,21 @@
+apiVersion: v2
+name: dell-bios-profile-exporter
+description: Monitor the BIOS System Profile on Dell PowerEdge servers via host-local racadm
+type: application
+version: 0.1.0
+appVersion: "0.1.0"
+kubeVersion: ">=1.24.0-0"
+keywords:
+  - dell
+  - poweredge
+  - idrac
+  - racadm
+  - bios
+  - prometheus
+  - victoriametrics
+maintainers:
+  - name: Andrei Taranik
+    email: andrey@cicd.team
+home: https://github.com/cicdteam/dell-bios-profile-exporter
+sources:
+  - https://github.com/cicdteam/dell-bios-profile-exporter

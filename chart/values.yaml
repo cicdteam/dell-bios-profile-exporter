@@ -1,0 +1,173 @@
+# Name overrides
+nameOverride: ""
+fullnameOverride: ""
+
+# Exporter image
+image:
+  # Image repository
+  repository: ghcr.io/cicdteam/dell-bios-profile-exporter
+  # Image tag. Empty = .Chart.AppVersion
+  tag: ""
+  # Pull policy
+  pullPolicy: IfNotPresent
+
+# Secrets for pulling private images
+imagePullSecrets: []
+
+# Monitoring stack to render CRDs for.
+# Allowed values:
+#   prometheus      - kube-prometheus-stack (ServiceMonitor/PodMonitor + PrometheusRule)
+#   victoriametrics - k8s-victoria-metrics-stack (VMServiceScrape/VMPodScrape + VMRule)
+#   both            - render both sets (useful during migrations)
+#   none            - render no monitoring CRDs (scrape configured manually)
+monitoring:
+  stack: prometheus
+
+  # Object used to collect metrics:
+  #   service - Service + ServiceMonitor/VMServiceScrape (recommended)
+  #   pod     - PodMonitor/VMPodScrape (no Service, scrape pods directly)
+  scrapeType: service
+
+  # Labels operators use for selection. Must match your Prometheus/VictoriaMetrics
+  # operator selectors. For kube-prometheus-stack typically: release: <stack-release>.
+  additionalLabels:
+    release: kube-prometheus-stack
+
+  # Scrape interval and timeout (applied to ServiceMonitor/PodMonitor/VM*)
+  interval: 60s
+  scrapeTimeout: 30s
+
+  # Optional extra relabelings
+  relabelings: []
+  metricRelabelings: []
+
+# Alerting configuration (PrometheusRule / VMRule)
+alerts:
+  # Render alerting rules
+  enabled: true
+
+  # Target profile value. DellBiosSysProfileDrift fires when the current value
+  # differs from this.
+  targetProfile: PerfOptimized
+
+  # Extra labels for alert grouping/routing
+  additionalLabels:
+    release: kube-prometheus-stack
+
+  # Per-rule parameters
+  rules:
+    # Profile differs from target for longer than `for`
+    drift:
+      enabled: true
+      for: 15m
+      severity: warning
+    # Exporter cannot read the value (iSM/racadm unavailable)
+    scrapeFailing:
+      enabled: true
+      for: 10m
+      severity: warning
+    # Profile has not been read for too long (metric is stale)
+    stale:
+      enabled: true
+      maxAgeMinutes: 30
+      for: 5m
+      severity: warning
+
+# Exporter runtime parameters
+exporter:
+  # racadm poll interval, seconds
+  pollInterval: 60
+  # getsysinfo refresh interval (Service Tag, model), seconds
+  sysinfoInterval: 3600
+  # Timeout of a single racadm call, seconds
+  requestTimeout: 15
+  # Path to the racadm binary ON THE HOST
+  racadmPath: /opt/dell/srvadmin/sbin/racadm
+  # Path to nsenter inside the container
+  nsenterPath: /usr/bin/nsenter
+  # Log level: DEBUG/INFO/WARNING/ERROR
+  logLevel: INFO
+  # HTTP port for metrics
+  port: 9101
+
+# DaemonSet placement
+placement:
+  # NodeSelector - Dell + worker nodes only.
+  # IMPORTANT: make sure the labels match your nodes.
+  nodeSelector:
+    node-role.kubernetes.io/worker: ""
+  # Tolerations for tainted nodes
+  tolerations: []
+  # Affinity (optional, on top of nodeSelector)
+  affinity: {}
+  # priorityClassName for the DaemonSet
+  priorityClassName: ""
+
+# Security - nsenter into host PID needs privileges
+security:
+  # Use privileged mode. The simplest option.
+  privileged: true
+  # Alternative to privileged - a targeted capability set.
+  # Used only when privileged=false.
+  capabilities:
+    add:
+      - SYS_ADMIN
+      - SYS_PTRACE
+    drop:
+      - ALL
+  # hostPID is required for nsenter --target 1
+  hostPID: true
+  # runAsUser=0 is required to enter host mount/PID namespaces.
+  runAsUser: 0
+  runAsGroup: 0
+  # The exporter never writes to disk
+  readOnlyRootFilesystem: true
+  # seccomp profile
+  seccompProfile:
+    type: RuntimeDefault
+
+# Per-node resources (DaemonSet)
+resources:
+  requests:
+    cpu: 25m
+    memory: 48Mi
+  limits:
+    cpu: 100m
+    memory: 96Mi
+
+# ServiceAccount (created by the chart)
+serviceAccount:
+  create: true
+  name: ""
+  annotations: {}
+
+# Service
+service:
+  type: ClusterIP
+  port: 9101
+  annotations: {}
+  labels: {}
+
+# Extra pod annotations and labels
+podAnnotations: {}
+podLabels: {}
+
+# Cluster label. If set, it is injected into scraped metrics via relabeling
+# (recommended). Needed for the multi-cluster dashboard.
+clusterLabel:
+  # Inject the `cluster` label into scraped metrics
+  enabled: true
+  # Label value
+  value: "my-cluster"
+
+# Grafana dashboard
+dashboard:
+  # Create a ConfigMap with the dashboard for the Grafana sidecar (auto-discovery)
+  enabled: false
+  # Label the Grafana sidecar uses to pick up dashboards
+  label:
+    name: grafana_dashboard
+    value: "1"
+  # Extra annotations (e.g. Grafana folder)
+  annotations:
+    grafana_folder: "Dell Hardware"

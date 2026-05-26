@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "monitoring": {
+      "type": "object",
+      "properties": {
+        "stack": {
+          "type": "string",
+          "enum": ["prometheus", "victoriametrics", "both", "none"]
+        },
+        "scrapeType": {
+          "type": "string",
+          "enum": ["service", "pod"]
+        }
+      }
+    },
+    "exporter": {
+      "type": "object",
+      "properties": {
+        "pollInterval": { "type": "integer", "minimum": 1 },
+        "sysinfoInterval": { "type": "integer", "minimum": 1 },
+        "requestTimeout": { "type": "integer", "minimum": 1 },
+        "port": { "type": "integer", "minimum": 1, "maximum": 65535 },
+        "logLevel": { "type": "string", "enum": ["DEBUG", "INFO", "WARNING", "ERROR"] }
+      }
+    },
+    "security": {
+      "type": "object",
+      "properties": {
+        "privileged": { "type": "boolean" },
+        "hostPID": { "type": "boolean" }
+      }
+    }
+  }
+}
