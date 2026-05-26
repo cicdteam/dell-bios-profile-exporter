@@ -37,8 +37,9 @@ Note: under Helm 4 the helm-unittest plugin installs with
 ## Package for an air-gapped environment
 
 ```bash
-helm package chart/ --destination dist/
-# copy dist/dell-bios-profile-exporter-0.1.0.tgz to the closed network, then:
+# On a connected host, pull the published chart from the OCI registry:
+helm pull oci://ghcr.io/cicdteam/charts/dell-bios-profile-exporter --version 0.1.0
+# copy dell-bios-profile-exporter-0.1.0.tgz into the closed network, then:
 helm install dell-bios ./dell-bios-profile-exporter-0.1.0.tgz -f my-values.yaml
 ```
 The container image must be mirrored into the private registry separately

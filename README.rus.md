@@ -37,8 +37,9 @@ helm unittest chart/
 ## Упаковка для закрытого контура
 
 ```bash
-helm package chart/ --destination dist/
-# скопируйте dist/dell-bios-profile-exporter-0.1.0.tgz в закрытую сеть, затем:
+# На машине с доступом в сеть скачайте опубликованный чарт из OCI-реестра:
+helm pull oci://ghcr.io/cicdteam/charts/dell-bios-profile-exporter --version 0.1.0
+# скопируйте dell-bios-profile-exporter-0.1.0.tgz в закрытую сеть, затем:
 helm install dell-bios ./dell-bios-profile-exporter-0.1.0.tgz -f my-values.yaml
 ```
 Образ контейнера нужно отдельно перенести в приватный реестр
