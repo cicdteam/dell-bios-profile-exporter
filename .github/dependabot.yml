@@ -1,0 +1,25 @@
+version: 2
+updates:
+  # Go modules for the exporter
+  - package-ecosystem: gomod
+    directory: /exporter
+    schedule:
+      interval: weekly
+    commit-message:
+      prefix: "Bump"
+
+  # GitHub Actions used in workflows
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    commit-message:
+      prefix: "Bump"
+
+  # Base images in the exporter Dockerfile
+  - package-ecosystem: docker
+    directory: /exporter
+    schedule:
+      interval: weekly
+    commit-message:
+      prefix: "Bump"

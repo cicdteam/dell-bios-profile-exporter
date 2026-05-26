@@ -1,0 +1,108 @@
+name: ci
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # Detect which component changed so we only run the relevant jobs.
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      go: ${{ steps.filter.outputs.go }}
+      chart: ${{ steps.filter.outputs.chart }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            go:
+              - 'exporter/**'
+              - '.github/workflows/ci.yml'
+            chart:
+              - 'chart/**'
+              - 'examples/**'
+              - 'scripts/verify.sh'
+              - '.github/workflows/ci.yml'
+
+  # Go exporter: mirrors the local `make` targets so CI == developer machine.
+  go:
+    needs: changes
+    if: ${{ needs.changes.outputs.go == 'true' }}
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: exporter
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: exporter/go.mod
+          cache-dependency-path: exporter/go.sum
+      - name: Check formatting (make fmt)
+        run: |
+          make fmt
+          git diff --exit-code || { echo "::error::Code is not formatted, run 'make fmt'"; exit 1; }
+      - name: Vet
+        run: make vet
+      - name: Lint
+        run: make lint
+      - name: Vulnerabilities
+        run: make vuln
+      - name: Test
+        run: make test
+      - name: Build
+        run: make build
+
+  # Build the image on PRs without pushing, to catch Dockerfile breakage early.
+  image:
+    needs: changes
+    if: ${{ needs.changes.outputs.go == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/build-push-action@v6
+        with:
+          context: exporter
+          file: exporter/Dockerfile
+          platforms: linux/amd64
+          push: false
+          build-args: |
+            VERSION=ci-${{ github.sha }}
+
+  # Helm chart: runs scripts/verify.sh, which covers lint/template/kubeconform
+  # /unittest against both Helm 3 and Helm 4.
+  chart:
+    needs: changes
+    if: ${{ needs.changes.outputs.chart == 'true' }}
+    runs-on: ubuntu-latest
+    env:
+      HELM3_VERSION: v3.17.3
+      KUBECONFORM_VERSION: v0.6.7
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Helm 4 (latest) as `helm`
+        run: curl -fsSL https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+      - name: Install Helm 3 as ~/bin/helm3
+        run: |
+          mkdir -p "$HOME/bin"
+          curl -fsSL "https://get.helm.sh/helm-${HELM3_VERSION}-linux-amd64.tar.gz" | tar -xz -C /tmp
+          mv /tmp/linux-amd64/helm "$HOME/bin/helm3"
+      - name: Install kubeconform
+        run: |
+          curl -fsSL "https://github.com/yannh/kubeconform/releases/download/${KUBECONFORM_VERSION}/kubeconform-linux-amd64.tar.gz" \
+            | sudo tar -xz -C /usr/local/bin kubeconform
+      - name: Install helm-unittest plugin
+        run: helm plugin install https://github.com/helm-unittest/helm-unittest --verify=false
+      - name: Verify chart
+        run: ./scripts/verify.sh
