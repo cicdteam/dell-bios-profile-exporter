@@ -34,7 +34,7 @@ helm unittest chart/
 Note: under Helm 4 the helm-unittest plugin installs with
 `helm plugin install https://github.com/helm-unittest/helm-unittest --verify=false`.
 
-## Package for an air-gapped environment
+## Install in an air-gapped environment
 
 ```bash
 # On a connected host, pull the published chart from the OCI registry:
@@ -46,8 +46,3 @@ The container image must be mirrored into the private registry separately
 (for example with `docker save` / `skopeo copy` into your internal registry).
 
 See `chart/README.md` for detailed usage. Russian: `README.rus.md`.
-
-## Next steps (not included)
-
-CI/CD for the chart and image (lint, unit, package, push) is intentionally out
-of scope and can be added later.
