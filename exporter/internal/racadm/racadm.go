@@ -3,10 +3,13 @@
 package racadm
 
 import (
+	"context"
 	"errors"
 	"fmt"
+	"os/exec"
 	"regexp"
 	"strings"
+	"time"
 )
 
 // SysInfo holds the static server identity read from `racadm getsysinfo`.
@@ -80,4 +83,76 @@ func parseSysInfo(out []byte) (SysInfo, error) {
 		}
 	}
 	return si, nil
+}
+
+// Runner executes a command and returns its combined stdout. It is the single
+// seam where the exporter touches the OS, so tests substitute a stub.
+type Runner interface {
+	Run(ctx context.Context, name string, args ...string) ([]byte, error)
+}
+
+// ExecRunner runs commands with os/exec, bounded by the context deadline.
+type ExecRunner struct{}
+
+func (ExecRunner) Run(ctx context.Context, name string, args ...string) ([]byte, error) {
+	return exec.CommandContext(ctx, name, args...).Output()
+}
+
+// Client runs racadm inside the host namespaces via nsenter.
+type Client struct {
+	runner      Runner
+	nsenterPath string
+	racadmPath  string
+	timeout     time.Duration
+}
+
+// NewClient builds a Client. A zero timeout means no per-call deadline.
+func NewClient(runner Runner, nsenterPath, racadmPath string, timeout time.Duration) *Client {
+	return &Client{runner: runner, nsenterPath: nsenterPath, racadmPath: racadmPath, timeout: timeout}
+}
+
+func (c *Client) run(ctx context.Context, racadmArgs ...string) ([]byte, error) {
+	if c.timeout > 0 {
+		var cancel context.CancelFunc
+		ctx, cancel = context.WithTimeout(ctx, c.timeout)
+		defer cancel()
+	}
+	args := append([]string{
+		"--target", "1", "--mount", "--uts", "--ipc", "--net", "--pid", "--",
+		c.racadmPath,
+	}, racadmArgs...)
+	out, err := c.runner.Run(ctx, c.nsenterPath, args...)
+	if err != nil {
+		return nil, &Error{Reason: classify(ctx, err), Err: err}
+	}
+	return out, nil
+}
+
+func classify(ctx context.Context, err error) string {
+	if ctx.Err() == context.DeadlineExceeded {
+		return "timeout"
+	}
+	var execErr *exec.Error
+	if errors.As(err, &execErr) {
+		return "nsenter_failed"
+	}
+	return "exit_code"
+}
+
+// SysProfile reads and normalizes BIOS.SysProfileSettings.SysProfile.
+func (c *Client) SysProfile(ctx context.Context) (string, error) {
+	out, err := c.run(ctx, "get", "BIOS.SysProfileSettings.SysProfile")
+	if err != nil {
+		return "", err
+	}
+	return parseSysProfile(out)
+}
+
+// SysInfo reads server identity from racadm getsysinfo.
+func (c *Client) SysInfo(ctx context.Context) (SysInfo, error) {
+	out, err := c.run(ctx, "getsysinfo")
+	if err != nil {
+		return SysInfo{}, err
+	}
+	return parseSysInfo(out)
 }
