@@ -1,0 +1,30 @@
+Chart {{ .Chart.Name }} installed in namespace {{ .Release.Namespace }}.
+
+Check the DaemonSet is up:
+  kubectl -n {{ .Release.Namespace }} get ds {{ include "dell-bios.fullname" . }}
+
+Check pods are Running on the intended nodes:
+  kubectl -n {{ .Release.Namespace }} get pods -l app.kubernetes.io/name={{ include "dell-bios.name" . }} -o wide
+
+View metrics locally via port-forward:
+  kubectl -n {{ .Release.Namespace }} port-forward ds/{{ include "dell-bios.fullname" . }} {{ .Values.exporter.port }}:{{ .Values.exporter.port }}
+  curl http://localhost:{{ .Values.exporter.port }}/metrics | grep dell_bios
+
+If pods are in CrashLoopBackOff, check on the node:
+  - systemctl status dcismeng       (iSM must be active)
+  - ls -la {{ .Values.exporter.racadmPath }}    (racadm binary)
+  - {{ .Values.exporter.racadmPath }} get BIOS.SysProfileSettings.SysProfile
+
+{{- if eq .Values.monitoring.stack "prometheus" }}
+
+Metrics are collected via ServiceMonitor (kube-prometheus-stack).
+Check Prometheus picked it up:
+  kubectl -n {{ .Release.Namespace }} get servicemonitor {{ include "dell-bios.fullname" . }}
+{{- else if eq .Values.monitoring.stack "victoriametrics" }}
+
+Metrics are collected via VMServiceScrape (k8s-victoria-metrics-stack).
+Check VMAgent picked up the scrape:
+  kubectl -n {{ .Release.Namespace }} get vmservicescrape {{ include "dell-bios.fullname" . }}
+{{- end }}
+
+Full documentation: see README.md in the chart.
