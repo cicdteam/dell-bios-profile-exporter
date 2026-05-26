@@ -1,0 +1,16 @@
+{{- if .Values.dashboard.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "dell-bios.fullname" . }}-dashboard
+  labels:
+    {{- include "dell-bios.labels" . | nindent 4 }}
+    {{ .Values.dashboard.label.name }}: {{ .Values.dashboard.label.value | quote }}
+  {{- with .Values.dashboard.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+data:
+  dell-bios-profile.json: |-
+    {{- .Files.Get "dashboards/dell-bios-profile.json" | nindent 4 }}
+{{- end }}

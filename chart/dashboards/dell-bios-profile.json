@@ -1,0 +1,177 @@
+{
+  "title": "Dell BIOS System Profile",
+  "uid": "dell-bios-profile",
+  "schemaVersion": 39,
+  "editable": true,
+  "tags": ["dell", "bios", "idrac"],
+  "time": { "from": "now-6h", "to": "now" },
+  "templating": {
+    "list": [
+      {
+        "name": "datasource",
+        "type": "datasource",
+        "query": "prometheus",
+        "current": {}
+      },
+      {
+        "name": "cluster",
+        "type": "query",
+        "datasource": { "type": "prometheus", "uid": "${datasource}" },
+        "query": "label_values(dell_bios_sys_profile_info, cluster)",
+        "includeAll": true,
+        "multi": true,
+        "refresh": 2
+      },
+      {
+        "name": "node",
+        "type": "query",
+        "datasource": { "type": "prometheus", "uid": "${datasource}" },
+        "query": "label_values(dell_bios_sys_profile_info{cluster=~\"$cluster\"}, node)",
+        "includeAll": true,
+        "multi": true,
+        "refresh": 2
+      },
+      {
+        "name": "profile",
+        "type": "query",
+        "datasource": { "type": "prometheus", "uid": "${datasource}" },
+        "query": "label_values(dell_bios_sys_profile_info{cluster=~\"$cluster\", node=~\"$node\"}, profile)",
+        "includeAll": true,
+        "multi": true,
+        "refresh": 2
+      },
+      {
+        "name": "target_profile",
+        "type": "constant",
+        "query": "PerfOptimized",
+        "current": { "value": "PerfOptimized", "text": "PerfOptimized" }
+      }
+    ]
+  },
+  "annotations": {
+    "list": [
+      {
+        "name": "Dell BIOS alerts",
+        "datasource": { "type": "prometheus", "uid": "${datasource}" },
+        "enable": true,
+        "expr": "ALERTS{alertname=~\"DellBios.*\"}",
+        "iconColor": "red"
+      }
+    ]
+  },
+  "panels": [
+    {
+      "id": 1,
+      "type": "stat",
+      "title": "Nodes monitored",
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "gridPos": { "h": 4, "w": 6, "x": 0, "y": 0 },
+      "targets": [
+        { "expr": "count(dell_bios_sys_profile_info{cluster=~\"$cluster\",node=~\"$node\"})" }
+      ]
+    },
+    {
+      "id": 2,
+      "type": "stat",
+      "title": "Nodes on target profile",
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "gridPos": { "h": 4, "w": 6, "x": 6, "y": 0 },
+      "targets": [
+        { "expr": "count(dell_bios_sys_profile_matches_target{cluster=~\"$cluster\",node=~\"$node\",target=\"$target_profile\"} == 1)" }
+      ]
+    },
+    {
+      "id": 3,
+      "type": "stat",
+      "title": "Nodes drifting",
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "gridPos": { "h": 4, "w": 6, "x": 12, "y": 0 },
+      "fieldConfig": { "defaults": { "thresholds": { "steps": [ { "color": "green", "value": null }, { "color": "red", "value": 1 } ] } } },
+      "targets": [
+        { "expr": "count(dell_bios_sys_profile_matches_target{cluster=~\"$cluster\",node=~\"$node\",target=\"$target_profile\"} == 0)" }
+      ]
+    },
+    {
+      "id": 4,
+      "type": "stat",
+      "title": "Nodes with exporter failing",
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "gridPos": { "h": 4, "w": 6, "x": 18, "y": 0 },
+      "targets": [
+        { "expr": "count(dell_bios_racadm_success{cluster=~\"$cluster\"} == 0)" }
+      ]
+    },
+    {
+      "id": 5,
+      "type": "piechart",
+      "title": "Profile distribution",
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "gridPos": { "h": 8, "w": 8, "x": 0, "y": 4 },
+      "targets": [
+        { "expr": "count by (profile) (dell_bios_sys_profile_info{cluster=~\"$cluster\",node=~\"$node\"})", "legendFormat": "{{profile}}" }
+      ]
+    },
+    {
+      "id": 6,
+      "type": "barchart",
+      "title": "Profiles by cluster",
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "gridPos": { "h": 8, "w": 16, "x": 8, "y": 4 },
+      "targets": [
+        { "expr": "count by (cluster, profile) (dell_bios_sys_profile_info{cluster=~\"$cluster\"})", "legendFormat": "{{cluster}} / {{profile}}" }
+      ]
+    },
+    {
+      "id": 7,
+      "type": "timeseries",
+      "title": "Drifting nodes by cluster",
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 12 },
+      "targets": [
+        { "expr": "sum by (cluster) (dell_bios_sys_profile_matches_target{target=\"$target_profile\"} == bool 0)", "legendFormat": "{{cluster}}" }
+      ]
+    },
+    {
+      "id": 8,
+      "type": "timeseries",
+      "title": "racadm poll duration",
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 12 },
+      "targets": [
+        { "expr": "dell_bios_racadm_duration_seconds{cluster=~\"$cluster\",node=~\"$node\"}", "legendFormat": "{{node}}" }
+      ]
+    },
+    {
+      "id": 9,
+      "type": "table",
+      "title": "Node detail",
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "gridPos": { "h": 10, "w": 24, "x": 0, "y": 20 },
+      "targets": [
+        { "expr": "dell_bios_sys_profile_info{cluster=~\"$cluster\",node=~\"$node\",profile=~\"$profile\"}", "format": "table", "instant": true }
+      ],
+      "transformations": [
+        { "id": "labelsToFields", "options": {} },
+        { "id": "organize", "options": { "excludeByName": { "Time": true, "Value": true, "__name__": true } } }
+      ],
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "service_tag" },
+            "properties": [
+              { "id": "links", "value": [ { "title": "Dell support", "url": "https://www.dell.com/support/home/en-us/product-support/servicetag/${__data.fields.service_tag}/overview", "targetBlank": true } ] }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": 10,
+      "type": "alertlist",
+      "title": "Dell BIOS alerts",
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 30 },
+      "options": { "alertName": "DellBios", "dashboardAlerts": false, "showOptions": "current" }
+    }
+  ]
+}
