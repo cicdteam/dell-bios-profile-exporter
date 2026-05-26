@@ -20,7 +20,7 @@ jobs:
       go: ${{ steps.filter.outputs.go }}
       chart: ${{ steps.filter.outputs.chart }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: dorny/paths-filter@v3
         id: filter
         with:
@@ -43,7 +43,7 @@ jobs:
       run:
         working-directory: exporter
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: actions/setup-go@v5
         with:
           go-version-file: exporter/go.mod
@@ -69,7 +69,7 @@ jobs:
     if: ${{ needs.changes.outputs.go == 'true' }}
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: docker/setup-buildx-action@v4
       - uses: docker/build-push-action@v6
         with:
@@ -91,7 +91,7 @@ jobs:
       HELM3_VERSION: v3.17.3
       KUBECONFORM_VERSION: v0.6.7
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Install Helm 4 as `helm`
         run: |
           curl -fsSL "https://get.helm.sh/helm-${HELM4_VERSION}-linux-amd64.tar.gz" | tar -xz -C /tmp
