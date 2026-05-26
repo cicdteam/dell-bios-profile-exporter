@@ -1,0 +1,15 @@
+{{- if and .Values.alerts.enabled (eq (include "dell-bios.shouldRenderPrometheus" .) "true") }}
+{{- if .Capabilities.APIVersions.Has "monitoring.coreos.com/v1" }}
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: {{ include "dell-bios.fullname" . }}
+  labels:
+    {{- include "dell-bios.labels" . | nindent 4 }}
+    {{- with .Values.alerts.additionalLabels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  {{- include "dell-bios.alertGroups" . | nindent 2 }}
+{{- end }}
+{{- end }}
