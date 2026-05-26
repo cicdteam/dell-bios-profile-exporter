@@ -20,7 +20,7 @@ jobs:
       IMAGE: ghcr.io/cicdteam/dell-bios-profile-exporter
       CHART_REGISTRY: oci://ghcr.io/cicdteam/charts
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Derive version from tag
         id: ver
