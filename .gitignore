@@ -10,6 +10,5 @@ CLAUDE.local.md
 /exporter/bin/
 *.out
 
-# Packaged chart + build artifacts
-/dist/
+# Local helm package output (chart is published to the OCI registry, not committed)
 *.tgz
