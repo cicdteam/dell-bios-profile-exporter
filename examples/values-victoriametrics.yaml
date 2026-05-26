@@ -1,0 +1,17 @@
+# Base install with k8s-victoria-metrics-stack
+monitoring:
+  stack: victoriametrics
+  additionalLabels: {}
+alerts:
+  enabled: true
+clusterLabel:
+  enabled: true
+  value: "prod-dc1"
+dashboard:
+  enabled: true
+  label:
+    name: grafana_dashboard
+    value: "1"
+placement:
+  nodeSelector:
+    node-role.kubernetes.io/worker: ""

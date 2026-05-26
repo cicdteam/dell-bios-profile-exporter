@@ -1,0 +1,17 @@
+# Base install with kube-prometheus-stack
+monitoring:
+  stack: prometheus
+  additionalLabels:
+    release: kube-prometheus-stack
+alerts:
+  enabled: true
+  additionalLabels:
+    release: kube-prometheus-stack
+clusterLabel:
+  enabled: true
+  value: "prod-dc1"
+dashboard:
+  enabled: true
+placement:
+  nodeSelector:
+    node-role.kubernetes.io/worker: ""

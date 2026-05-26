@@ -1,0 +1,28 @@
+# Multi-cluster deployment.
+#
+# Deploy one release per cluster from the same chart, changing only
+# clusterLabel.value. Example GitOps layout:
+#   clusters/prod-eu/values.yaml   -> clusterLabel.value: prod-eu
+#   clusters/prod-us/values.yaml   -> clusterLabel.value: prod-us
+#
+# The `cluster` label is injected by the ServiceMonitor/VMServiceScrape
+# relabeling, so dashboards and alerts can filter by cluster.
+#
+# stack: both is useful during a migration from Prometheus to VictoriaMetrics:
+# the chart renders both sets of CRDs at once.
+monitoring:
+  stack: both
+  additionalLabels:
+    release: kube-prometheus-stack
+alerts:
+  enabled: true
+  additionalLabels:
+    release: kube-prometheus-stack
+clusterLabel:
+  enabled: true
+  value: "prod-eu-west-1"
+dashboard:
+  enabled: true
+placement:
+  nodeSelector:
+    node-role.kubernetes.io/worker: ""
