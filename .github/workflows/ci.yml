@@ -96,11 +96,18 @@ jobs:
         run: |
           curl -fsSL "https://get.helm.sh/helm-${HELM4_VERSION}-linux-amd64.tar.gz" | tar -xz -C /tmp
           sudo mv /tmp/linux-amd64/helm /usr/local/bin/helm
-      - name: Install Helm 3 as ~/bin/helm3
+      - name: Install Helm 3 as ~/bin/helm3 (isolated plugin home)
         run: |
-          mkdir -p "$HOME/bin" /tmp/h3
+          mkdir -p "$HOME/bin" /tmp/h3 "$HOME/.helm3-plugins"
           curl -fsSL "https://get.helm.sh/helm-${HELM3_VERSION}-linux-amd64.tar.gz" | tar -xz -C /tmp/h3
-          mv /tmp/h3/linux-amd64/helm "$HOME/bin/helm3"
+          mv /tmp/h3/linux-amd64/helm "$HOME/bin/helm3.real"
+          # Point Helm 3 at an empty plugin dir so it does not try to load the
+          # Helm 4-format helm-unittest plugin (it warns on the platformHooks field).
+          printf '%s\n' \
+            '#!/usr/bin/env bash' \
+            'export HELM_PLUGINS="$HOME/.helm3-plugins"' \
+            'exec "$HOME/bin/helm3.real" "$@"' > "$HOME/bin/helm3"
+          chmod +x "$HOME/bin/helm3"
       - name: Install kubeconform
         run: |
           curl -fsSL "https://github.com/yannh/kubeconform/releases/download/${KUBECONFORM_VERSION}/kubeconform-linux-amd64.tar.gz" \
