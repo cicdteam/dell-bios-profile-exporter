@@ -1,0 +1,56 @@
+suite: monitoring CRDs
+templates:
+  - templates/servicemonitor.yaml
+  - templates/podmonitor.yaml
+  - templates/vmservicescrape.yaml
+  - templates/vmpodscrape.yaml
+  - templates/service.yaml
+tests:
+  - it: renders ServiceMonitor for prometheus + service
+    capabilities:
+      apiVersions:
+        - monitoring.coreos.com/v1
+    template: templates/servicemonitor.yaml
+    asserts:
+      - isKind:
+          of: ServiceMonitor
+      - equal:
+          path: spec.endpoints[0].relabelings[0].targetLabel
+          value: cluster
+  - it: renders nothing for stack none
+    set:
+      monitoring.stack: none
+    template: templates/servicemonitor.yaml
+    asserts:
+      - hasDocuments:
+          count: 0
+  - it: renders VMServiceScrape for victoriametrics
+    set:
+      monitoring.stack: victoriametrics
+    capabilities:
+      apiVersions:
+        - operator.victoriametrics.com/v1beta1
+    template: templates/vmservicescrape.yaml
+    asserts:
+      - isKind:
+          of: VMServiceScrape
+      - equal:
+          path: spec.endpoints[0].relabelConfigs[0].targetLabel
+          value: cluster
+  - it: renders PodMonitor for scrapeType pod
+    set:
+      monitoring.scrapeType: pod
+    capabilities:
+      apiVersions:
+        - monitoring.coreos.com/v1
+    template: templates/podmonitor.yaml
+    asserts:
+      - isKind:
+          of: PodMonitor
+  - it: omits Service for scrapeType pod
+    set:
+      monitoring.scrapeType: pod
+    template: templates/service.yaml
+    asserts:
+      - hasDocuments:
+          count: 0

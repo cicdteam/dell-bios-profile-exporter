@@ -1,0 +1,17 @@
+suite: dashboard configmap
+templates:
+  - templates/grafana-dashboard-cm.yaml
+tests:
+  - it: not rendered by default
+    asserts:
+      - hasDocuments:
+          count: 0
+  - it: rendered when enabled with sidecar label
+    set:
+      dashboard.enabled: true
+    asserts:
+      - isKind:
+          of: ConfigMap
+      - equal:
+          path: metadata.labels.grafana_dashboard
+          value: "1"

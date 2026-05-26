@@ -1,0 +1,47 @@
+suite: alert rules
+templates:
+  - templates/prometheusrule.yaml
+  - templates/vmrule.yaml
+tests:
+  - it: renders three Prometheus alerts by default
+    capabilities:
+      apiVersions:
+        - monitoring.coreos.com/v1
+    template: templates/prometheusrule.yaml
+    asserts:
+      - isKind:
+          of: PrometheusRule
+      - lengthEqual:
+          path: spec.groups[0].rules
+          count: 3
+  - it: drops drift rule when disabled
+    set:
+      alerts.rules.drift.enabled: false
+    capabilities:
+      apiVersions:
+        - monitoring.coreos.com/v1
+    template: templates/prometheusrule.yaml
+    asserts:
+      - lengthEqual:
+          path: spec.groups[0].rules
+          count: 2
+  - it: renders no PrometheusRule when alerts disabled
+    set:
+      alerts.enabled: false
+    capabilities:
+      apiVersions:
+        - monitoring.coreos.com/v1
+    template: templates/prometheusrule.yaml
+    asserts:
+      - hasDocuments:
+          count: 0
+  - it: renders VMRule for victoriametrics
+    set:
+      monitoring.stack: victoriametrics
+    capabilities:
+      apiVersions:
+        - operator.victoriametrics.com/v1beta1
+    template: templates/vmrule.yaml
+    asserts:
+      - isKind:
+          of: VMRule

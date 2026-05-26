@@ -1,0 +1,27 @@
+suite: security context
+templates:
+  - templates/daemonset.yaml
+  - templates/configmap.yaml
+tests:
+  - it: uses privileged by default
+    template: templates/daemonset.yaml
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].securityContext.privileged
+          value: true
+  - it: switches to capabilities when privileged is false
+    template: templates/daemonset.yaml
+    set:
+      security.privileged: false
+    asserts:
+      - isNull:
+          path: spec.template.spec.containers[0].securityContext.privileged
+      - equal:
+          path: spec.template.spec.containers[0].securityContext.capabilities.add[0]
+          value: SYS_ADMIN
+  - it: sets hostPID
+    template: templates/daemonset.yaml
+    asserts:
+      - equal:
+          path: spec.template.spec.hostPID
+          value: true
