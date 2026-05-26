@@ -1,5 +1,10 @@
 # dell-bios-profile-exporter
 
+[![CI](https://github.com/cicdteam/dell-bios-profile-exporter/actions/workflows/ci.yml/badge.svg)](https://github.com/cicdteam/dell-bios-profile-exporter/actions/workflows/ci.yml)
+[![License](https://img.shields.io/github/license/cicdteam/dell-bios-profile-exporter)](LICENSE)
+[![Go version](https://img.shields.io/github/go-mod/go-version/cicdteam/dell-bios-profile-exporter?filename=exporter/go.mod)](exporter/go.mod)
+[![Release](https://img.shields.io/github/v/release/cicdteam/dell-bios-profile-exporter?sort=semver)](https://github.com/cicdteam/dell-bios-profile-exporter/releases/latest)
+
 Prometheus-совместимый экспортер и Helm-чарт для мониторинга атрибута BIOS
 **System Profile** на серверах Dell PowerEdge через локальную утилиту `racadm`
 (посредством iDRAC Service Module). Формирует алерт при отклонении от целевого
@@ -16,8 +21,8 @@ Prometheus-совместимый экспортер и Helm-чарт для м�
 
 ```bash
 cd exporter
-docker build --platform linux/amd64 --build-arg VERSION=0.1.0 \
-  -t ghcr.io/cicdteam/dell-bios-profile-exporter:0.1.0 .
+docker build --platform linux/amd64 --build-arg VERSION=0.1.1 \
+  -t ghcr.io/cicdteam/dell-bios-profile-exporter:0.1.1 .
 ```
 
 ## Проверка чарта без установки
@@ -38,9 +43,9 @@ helm unittest chart/
 
 ```bash
 # На машине с доступом в сеть скачайте опубликованный чарт из OCI-реестра:
-helm pull oci://ghcr.io/cicdteam/charts/dell-bios-profile-exporter --version 0.1.0
-# скопируйте dell-bios-profile-exporter-0.1.0.tgz в закрытую сеть, затем:
-helm install dell-bios ./dell-bios-profile-exporter-0.1.0.tgz -f my-values.yaml
+helm pull oci://ghcr.io/cicdteam/charts/dell-bios-profile-exporter --version 0.1.1
+# скопируйте dell-bios-profile-exporter-0.1.1.tgz в закрытую сеть, затем:
+helm install dell-bios ./dell-bios-profile-exporter-0.1.1.tgz -f my-values.yaml
 ```
 Образ контейнера нужно отдельно перенести в приватный реестр
 (например, через `docker save` / `skopeo copy` в ваш внутренний реестр).
