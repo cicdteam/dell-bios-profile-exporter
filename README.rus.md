@@ -34,7 +34,7 @@ helm unittest chart/
 Примечание: под Helm 4 плагин helm-unittest ставится командой
 `helm plugin install https://github.com/helm-unittest/helm-unittest --verify=false`.
 
-## Упаковка для закрытого контура
+## Установка в закрытом контуре
 
 ```bash
 # На машине с доступом в сеть скачайте опубликованный чарт из OCI-реестра:
@@ -46,8 +46,3 @@ helm install dell-bios ./dell-bios-profile-exporter-0.1.0.tgz -f my-values.yaml
 (например, через `docker save` / `skopeo copy` в ваш внутренний реестр).
 
 Подробное использование: см. `chart/README.rus.md`.
-
-## Дальнейшие шаги (не входят в проект)
-
-CI/CD для чарта и образа (lint, unit, package, push) сознательно вне объёма и
-может быть добавлен позже.
