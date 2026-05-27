@@ -2,8 +2,8 @@ apiVersion: v2
 name: dell-bios-profile-exporter
 description: Monitor the BIOS System Profile on Dell PowerEdge servers via host-local racadm
 type: application
-version: 0.1.3
-appVersion: "0.1.3"
+version: 0.1.4
+appVersion: "0.1.4"
 kubeVersion: ">=1.24.0-0"
 keywords:
   - dell
