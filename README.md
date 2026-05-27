@@ -108,6 +108,16 @@ The container image must be mirrored into the private registry separately
 | `dell_bios_last_scrape_timestamp_seconds` | gauge | `node` | Unix time of the last successful poll. |
 | `dell_bios_exporter_build_info` | gauge (=1) | `version`, `go_version` | Build information for the running exporter. |
 
+## Grafana dashboard
+
+The chart ships a Grafana dashboard (`chart/dashboards/dell-bios-profile.json`),
+auto-discovered by the Grafana sidecar when `dashboard.enabled=true`. It shows
+node counts (monitored / on-target / drifting / exporter-failing), profile
+distribution, per-cluster breakdowns and a per-node detail table. Screenshot
+below uses synthetic data:
+
+![Grafana dashboard](docs/images/grafana-dashboard.png)
+
 For node prerequisites (installing iSM and racadm), chart installation,
 configuration, alerts, the Grafana dashboard and troubleshooting, see
 `chart/README.md`. Russian: `README.rus.md`.

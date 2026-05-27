@@ -108,5 +108,15 @@ helm install dell-bios ./dell-bios-profile-exporter-0.1.5.tgz -f my-values.yaml
 | `dell_bios_last_scrape_timestamp_seconds` | gauge | `node` | Unix-время последнего успешного опроса. |
 | `dell_bios_exporter_build_info` | gauge (=1) | `version`, `go_version` | Информация о сборке работающего экспортера. |
 
+## Дашборд Grafana
+
+Чарт поставляет дашборд Grafana (`chart/dashboards/dell-bios-profile.json`),
+который Grafana sidecar подхватывает автоматически при `dashboard.enabled=true`.
+Он показывает счётчики нод (под мониторингом / на целевом профиле / с дрейфом /
+с неработающим экспортером), распределение профилей, разбивку по кластерам и
+таблицу детализации по нодам. Скриншот ниже - на синтетических данных:
+
+![Дашборд Grafana](docs/images/grafana-dashboard.png)
+
 Предусловия на узлах (установка iSM и racadm), установка чарта, конфигурация,
 алерты, дашборд Grafana и troubleshooting - см. `chart/README.rus.md`.
