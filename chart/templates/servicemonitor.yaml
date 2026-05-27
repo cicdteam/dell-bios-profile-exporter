@@ -1,5 +1,4 @@
 {{- if and (eq (include "dell-bios.shouldRenderPrometheus" .) "true") (eq .Values.monitoring.scrapeType "service") }}
-{{- if .Capabilities.APIVersions.Has "monitoring.coreos.com/v1" }}
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
@@ -32,5 +31,4 @@ spec:
         {{- with .Values.monitoring.metricRelabelings }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
-{{- end }}
 {{- end }}
