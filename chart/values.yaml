@@ -29,9 +29,12 @@ monitoring:
   scrapeType: service
 
   # Labels operators use for selection. Must match your Prometheus/VictoriaMetrics
-  # operator selectors. For kube-prometheus-stack typically: release: <stack-release>.
-  additionalLabels:
-    release: kube-prometheus-stack
+  # operator selectors. Empty by default: a non-empty default would deep-merge
+  # with (not replace) additionalLabels from an override values file. Set your
+  # own, for example (typical for kube-prometheus-stack):
+  #   additionalLabels:
+  #     release: kube-prometheus-stack
+  additionalLabels: {}
 
   # Scrape interval and timeout (applied to ServiceMonitor/PodMonitor/VM*)
   interval: 60s
@@ -50,9 +53,12 @@ alerts:
   # differs from this.
   targetProfile: PerfOptimized
 
-  # Extra labels for alert grouping/routing
-  additionalLabels:
-    release: kube-prometheus-stack
+  # Extra labels for alert grouping/routing. Empty by default: a non-empty
+  # default would deep-merge with (not replace) additionalLabels from an
+  # override values file. Set your own, for example (kube-prometheus-stack):
+  #   additionalLabels:
+  #     release: kube-prometheus-stack
+  additionalLabels: {}
 
   # Per-rule parameters
   rules:
