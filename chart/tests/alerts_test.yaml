@@ -13,6 +13,15 @@ tests:
       - lengthEqual:
           path: spec.groups[0].rules
           count: 3
+  - it: drift alert fires on the info metric so description labels resolve
+    template: templates/prometheusrule.yaml
+    asserts:
+      # Must fire on dell_bios_sys_profile_info (carries node/profile/
+      # service_tag/model), not on matches_target (only node/target), otherwise
+      # $labels.service_tag/model/profile render empty in the alert.
+      - matchRegex:
+          path: spec.groups[0].rules[0].expr
+          pattern: 'dell_bios_sys_profile_info\{profile!='
   - it: drops drift rule when disabled
     set:
       alerts.rules.drift.enabled: false

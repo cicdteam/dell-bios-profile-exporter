@@ -55,7 +55,7 @@ groups:
     rules:
       {{- if .Values.alerts.rules.drift.enabled }}
       - alert: DellBiosSysProfileDrift
-        expr: dell_bios_sys_profile_matches_target == 0
+        expr: dell_bios_sys_profile_info{profile!="{{ .Values.alerts.targetProfile }}"}
         for: {{ .Values.alerts.rules.drift.for }}
         labels:
           severity: {{ .Values.alerts.rules.drift.severity }}
