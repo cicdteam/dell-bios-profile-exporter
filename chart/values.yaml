@@ -92,10 +92,14 @@ exporter:
 
 # DaemonSet placement
 placement:
-  # NodeSelector - Dell + worker nodes only.
+  # NodeSelector - restrict scheduling to specific nodes (e.g. Dell workers).
+  # Empty by default on purpose: Helm deep-merges map values, so a non-empty
+  # default would merge with (not replace) a nodeSelector from an override
+  # values file, leaking this label. Set your own labels here, for example:
+  #   nodeSelector:
+  #     node-role.kubernetes.io/worker: ""
   # IMPORTANT: make sure the labels match your nodes.
-  nodeSelector:
-    node-role.kubernetes.io/worker: ""
+  nodeSelector: {}
   # Tolerations for tainted nodes
   tolerations: []
   # Affinity (optional, on top of nodeSelector)
@@ -155,8 +159,9 @@ podLabels: {}
 # Cluster label. If set, it is injected into scraped metrics via relabeling
 # (recommended). Needed for the multi-cluster dashboard.
 clusterLabel:
-  # Inject the `cluster` label into scraped metrics
-  enabled: true
+  # Inject the `cluster` label into scraped metrics (relabeling on the scrape).
+  # Disabled by default; enable and set `value` for multi-cluster dashboards.
+  enabled: false
   # Label value
   value: "my-cluster"
 

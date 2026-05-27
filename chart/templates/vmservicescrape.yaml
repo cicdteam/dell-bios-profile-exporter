@@ -19,6 +19,7 @@ spec:
     - port: metrics
       interval: {{ .Values.monitoring.interval }}
       scrapeTimeout: {{ .Values.monitoring.scrapeTimeout }}
+      {{- if or .Values.clusterLabel.enabled .Values.monitoring.relabelings }}
       relabelConfigs:
         {{- if .Values.clusterLabel.enabled }}
         - targetLabel: cluster
@@ -27,8 +28,9 @@ spec:
         {{- with .Values.monitoring.relabelings }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
+      {{- end }}
+      {{- with .Values.monitoring.metricRelabelings }}
       metricRelabelConfigs:
-        {{- with .Values.monitoring.metricRelabelings }}
         {{- toYaml . | nindent 8 }}
-        {{- end }}
+      {{- end }}
 {{- end }}
