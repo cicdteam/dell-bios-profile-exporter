@@ -21,8 +21,8 @@ from a target value (default `PerfOptimized`).
 
 ```bash
 cd exporter
-docker build --platform linux/amd64 --build-arg VERSION=0.1.1 \
-  -t ghcr.io/cicdteam/dell-bios-profile-exporter:0.1.1 .
+docker build --platform linux/amd64 --build-arg VERSION=0.1.2 \
+  -t ghcr.io/cicdteam/dell-bios-profile-exporter:0.1.2 .
 ```
 
 ## Test the chart without installing
@@ -43,9 +43,9 @@ Note: under Helm 4 the helm-unittest plugin installs with
 
 ```bash
 # On a connected host, pull the published chart from the OCI registry:
-helm pull oci://ghcr.io/cicdteam/charts/dell-bios-profile-exporter --version 0.1.1
-# copy dell-bios-profile-exporter-0.1.1.tgz into the closed network, then:
-helm install dell-bios ./dell-bios-profile-exporter-0.1.1.tgz -f my-values.yaml
+helm pull oci://ghcr.io/cicdteam/charts/dell-bios-profile-exporter --version 0.1.2
+# copy dell-bios-profile-exporter-0.1.2.tgz into the closed network, then:
+helm install dell-bios ./dell-bios-profile-exporter-0.1.2.tgz -f my-values.yaml
 ```
 The container image must be mirrored into the private registry separately
 (for example with `docker save` / `skopeo copy` into your internal registry).
