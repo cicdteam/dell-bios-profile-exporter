@@ -6,10 +6,9 @@ templates:
   - templates/vmpodscrape.yaml
   - templates/service.yaml
 tests:
+  # Rendering must depend only on monitoring.stack, not on cluster API discovery
+  # (no capabilities.apiVersions here on purpose: that is the regression guard).
   - it: renders ServiceMonitor for prometheus + service
-    capabilities:
-      apiVersions:
-        - monitoring.coreos.com/v1
     template: templates/servicemonitor.yaml
     asserts:
       - isKind:
@@ -27,9 +26,6 @@ tests:
   - it: renders VMServiceScrape for victoriametrics
     set:
       monitoring.stack: victoriametrics
-    capabilities:
-      apiVersions:
-        - operator.victoriametrics.com/v1beta1
     template: templates/vmservicescrape.yaml
     asserts:
       - isKind:
@@ -40,9 +36,6 @@ tests:
   - it: renders PodMonitor for scrapeType pod
     set:
       monitoring.scrapeType: pod
-    capabilities:
-      apiVersions:
-        - monitoring.coreos.com/v1
     template: templates/podmonitor.yaml
     asserts:
       - isKind:

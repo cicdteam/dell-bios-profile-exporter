@@ -1,5 +1,4 @@
 {{- if and (eq (include "dell-bios.shouldRenderVictoriaMetrics" .) "true") (eq .Values.monitoring.scrapeType "pod") }}
-{{- if .Capabilities.APIVersions.Has "operator.victoriametrics.com/v1beta1" }}
 apiVersion: operator.victoriametrics.com/v1beta1
 kind: VMPodScrape
 metadata:
@@ -32,5 +31,4 @@ spec:
         {{- with .Values.monitoring.metricRelabelings }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
-{{- end }}
 {{- end }}

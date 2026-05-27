@@ -1,5 +1,4 @@
 {{- if and .Values.alerts.enabled (eq (include "dell-bios.shouldRenderVictoriaMetrics" .) "true") }}
-{{- if .Capabilities.APIVersions.Has "operator.victoriametrics.com/v1beta1" }}
 apiVersion: operator.victoriametrics.com/v1beta1
 kind: VMRule
 metadata:
@@ -11,5 +10,4 @@ metadata:
     {{- end }}
 spec:
   {{- include "dell-bios.alertGroups" . | nindent 2 }}
-{{- end }}
 {{- end }}

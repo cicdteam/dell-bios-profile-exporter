@@ -3,10 +3,9 @@ templates:
   - templates/prometheusrule.yaml
   - templates/vmrule.yaml
 tests:
+  # No capabilities.apiVersions here on purpose: rendering must follow
+  # monitoring.stack / alerts.enabled, not cluster API discovery.
   - it: renders three Prometheus alerts by default
-    capabilities:
-      apiVersions:
-        - monitoring.coreos.com/v1
     template: templates/prometheusrule.yaml
     asserts:
       - isKind:
@@ -17,9 +16,6 @@ tests:
   - it: drops drift rule when disabled
     set:
       alerts.rules.drift.enabled: false
-    capabilities:
-      apiVersions:
-        - monitoring.coreos.com/v1
     template: templates/prometheusrule.yaml
     asserts:
       - lengthEqual:
@@ -28,9 +24,6 @@ tests:
   - it: renders no PrometheusRule when alerts disabled
     set:
       alerts.enabled: false
-    capabilities:
-      apiVersions:
-        - monitoring.coreos.com/v1
     template: templates/prometheusrule.yaml
     asserts:
       - hasDocuments:
@@ -38,9 +31,6 @@ tests:
   - it: renders VMRule for victoriametrics
     set:
       monitoring.stack: victoriametrics
-    capabilities:
-      apiVersions:
-        - operator.victoriametrics.com/v1beta1
     template: templates/vmrule.yaml
     asserts:
       - isKind:
