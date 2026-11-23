@@ -394,8 +394,8 @@ Build the exporter image:
 
 ```bash
 cd exporter
-docker build --platform linux/amd64 --build-arg VERSION=0.1.5 \
-  -t ghcr.io/cicdteam/dell-bios-profile-exporter:0.1.5 .
+docker build --platform linux/amd64 --build-arg VERSION=0.1.6 \
+  -t ghcr.io/cicdteam/dell-bios-profile-exporter:0.1.6 .
 ```
 
 The chart is tested against both Helm 3.x and Helm 4.x. Under Helm 4 the

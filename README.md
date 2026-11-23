@@ -67,8 +67,8 @@ host namespaces and runs the same `racadm` the node administrator would run.
 
 ```bash
 cd exporter
-docker build --platform linux/amd64 --build-arg VERSION=0.1.5 \
-  -t ghcr.io/cicdteam/dell-bios-profile-exporter:0.1.5 .
+docker build --platform linux/amd64 --build-arg VERSION=0.1.6 \
+  -t ghcr.io/cicdteam/dell-bios-profile-exporter:0.1.6 .
 ```
 
 ## Test the chart without installing
@@ -89,9 +89,9 @@ Note: under Helm 4 the helm-unittest plugin installs with
 
 ```bash
 # On a connected host, pull the published chart from the OCI registry:
-helm pull oci://ghcr.io/cicdteam/charts/dell-bios-profile-exporter --version 0.1.5
-# copy dell-bios-profile-exporter-0.1.5.tgz into the closed network, then:
-helm install dell-bios ./dell-bios-profile-exporter-0.1.5.tgz -f my-values.yaml
+helm pull oci://ghcr.io/cicdteam/charts/dell-bios-profile-exporter --version 0.1.6
+# copy dell-bios-profile-exporter-0.1.6.tgz into the closed network, then:
+helm install dell-bios ./dell-bios-profile-exporter-0.1.6.tgz -f my-values.yaml
 ```
 The container image must be mirrored into the private registry separately
 (for example with `docker save` / `skopeo copy` into your internal registry).
