@@ -27,12 +27,12 @@ jobs:
           filters: |
             go:
               - 'exporter/**'
-              - '.github/workflows/ci.yml'
+              - '.github/workflows/**'
             chart:
               - 'chart/**'
               - 'examples/**'
               - 'scripts/verify.sh'
-              - '.github/workflows/ci.yml'
+              - '.github/workflows/**'
 
   # Go exporter: mirrors the local `make` targets so CI == developer machine.
   go:
