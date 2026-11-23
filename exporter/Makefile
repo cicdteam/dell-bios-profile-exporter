@@ -4,7 +4,7 @@ VERSION ?= $(shell git describe --tags --always --dirty 2>/dev/null || echo dev)
 
 GOFUMPT_VERSION := v0.7.0
 GOVULN_VERSION := v1.3.0
-GOLANGCI_VERSION := v2.1.6
+GOLANGCI_VERSION := v2.15.0
 
 .PHONY: build test fmt vet lint vuln check
 
