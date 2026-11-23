@@ -67,8 +67,8 @@ Service Module уже поддерживает на хосте, поэтому �
 
 ```bash
 cd exporter
-docker build --platform linux/amd64 --build-arg VERSION=0.1.5 \
-  -t ghcr.io/cicdteam/dell-bios-profile-exporter:0.1.5 .
+docker build --platform linux/amd64 --build-arg VERSION=0.1.6 \
+  -t ghcr.io/cicdteam/dell-bios-profile-exporter:0.1.6 .
 ```
 
 ## Проверка чарта без установки
@@ -89,9 +89,9 @@ helm unittest chart/
 
 ```bash
 # На машине с доступом в сеть скачайте опубликованный чарт из OCI-реестра:
-helm pull oci://ghcr.io/cicdteam/charts/dell-bios-profile-exporter --version 0.1.5
-# скопируйте dell-bios-profile-exporter-0.1.5.tgz в закрытую сеть, затем:
-helm install dell-bios ./dell-bios-profile-exporter-0.1.5.tgz -f my-values.yaml
+helm pull oci://ghcr.io/cicdteam/charts/dell-bios-profile-exporter --version 0.1.6
+# скопируйте dell-bios-profile-exporter-0.1.6.tgz в закрытую сеть, затем:
+helm install dell-bios ./dell-bios-profile-exporter-0.1.6.tgz -f my-values.yaml
 ```
 Образ контейнера нужно отдельно перенести в приватный реестр
 (например, через `docker save` / `skopeo copy` в ваш внутренний реестр).
